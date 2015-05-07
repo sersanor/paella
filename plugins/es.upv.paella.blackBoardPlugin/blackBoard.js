@@ -125,33 +125,8 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		blackBoardDiv.className = "blackBoardDiv";
 		self._blackBoardDIV = blackBoardDiv;
 
-		var lensContainer = document.createElement("div");
-		lensContainer.className = "lensContainer";
-		self._lensContainer = lensContainer;
-
-		var conImg = document.createElement("img");
-		conImg.className = "conImg";
-		self._conImg = conImg;
-		
-		var aux = paella.player.videoContainer.getMasterVideoRect();
-		lensContainer.style.top = 385+"px";
-		lensContainer.style.width = 432+"px";
-		lensContainer.style.height = 243+"px";
-		lensContainer.style.left = 10+"px";
-		lensContainer.style.zIndex = 5000;
-		lensContainer.style.position = "absolute";
-
-		conImg.width = aux.width;
-		conImg.height = aux.height;
-
-		$(lensContainer).append(conImg);
-
-		$(self._lensContainer).mouseenter(function(){self.createLens(385, 10, 432, 243); self._blackBoardDIV.style.opacity = 1.0;});
-		$(self._lensContainer).mouseleave(function(){self.destroyLens();});
-
 		setTimeout(function(){ // TIMER FOR NICE VIEW
 			$(self._overlayContainer).append(blackBoardDiv);
-			$(self._overlayContainer).append(lensContainer);
 		}, self._creationTimer);
 		
 
