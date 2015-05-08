@@ -57,7 +57,8 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 
 	setup:function() {
 		var self = this;
-		self._overlayContainer = $("#overlayContainer");
+		//self._overlayContainer = $("#overlayContainer");
+		self._overlayContainer = $("#playerContainer_videoContainer_container");
 		self._lensFrame = $("#playerContainer_videoContainer_1");		
 
 				//  BRING THE IMAGE ARRAY TO LOCAL
@@ -125,11 +126,35 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		blackBoardDiv.className = "blackBoardDiv";
 		self._blackBoardDIV = blackBoardDiv;
 
-		setTimeout(function(){ // TIMER FOR NICE VIEW
-			$(self._overlayContainer).append(blackBoardDiv);
-		}, self._creationTimer);
-		
+		var largeDiv = document.createElement("div");
+		largeDiv.className = "largeDiv";
 
+		var stDiv = document.createElement("div");
+		stDiv.className = "stDiv";
+
+		var ndDiv = document.createElement("div");
+		ndDiv.className = "ndDiv";
+
+		
+		var mvideoR = paella.player.videoContainer.getMasterVideoRect();
+		stDiv.style.top = mvideoR.top+"px";
+		stDiv.style.left = mvideoR.left+"px";
+		stDiv.style.height = mvideoR.height+"px";
+		stDiv.style.width = mvideoR.width+"px";
+
+		var svideoR = paella.player.videoContainer.getSlaveVideoRect();
+		ndDiv.style.top = svideoR.top+"px";
+		ndDiv.style.left = svideoR.left+"px";
+		ndDiv.style.height = svideoR.height+"px";
+		ndDiv.style.width = svideoR.width+"px";
+
+
+		$("#overlayContainer").append(stDiv);
+		$("#overlayContainer").append(ndDiv);
+
+		
+		$(self._overlayContainer).append(blackBoardDiv);
+		
 
 
 	},
@@ -168,7 +193,6 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 					image.src = src;
 
 					self._actualImage = src;
-					self._conImg.src = self._actualImage;
 			}
 		
 	},
