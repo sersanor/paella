@@ -18,6 +18,13 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 	_conImg:null,
 	_currentZoom:100,
 	_maxZoom:250,
+	_divWidth:null,
+	_divHeight:null,
+	_posX:null,
+	_posY:null,
+	_stDiv:null,
+	_ndDiv:null,
+
 
 	getIndex:function(){return 10;},
 
@@ -39,8 +46,12 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
     	var self = this;
     	switch(event){
     		case paella.events.setProfile: if(params.profileName==self._blackBoardProfile){
-    											self.createOverlay();
-    											self._active = true;
+   												if(self._blackBoardDIV!=null) {	
+	    											setTimeout(function(e){
+													self.createOverlay();
+	    											},self._creationTimer);
+	    											self._active = true;
+	    										}
     										} 
     										else{
     											self.destroyOverlay();
@@ -60,8 +71,7 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 	setup:function() {
 		var self = this;
 		//self._overlayContainer = $("#overlayContainer");
-		self._overlayContainer = $("#playerContainer_videoContainer_container");
-		self._lensFrame = $("#playerContainer_videoContainer_1");		
+		self._overlayContainer = $("#overlayContainer");	
 
 				//  BRING THE IMAGE ARRAY TO LOCAL
 		self._zImages = {};
@@ -108,19 +118,30 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		stDiv.style.left = mvideoR.left+"px";
 		stDiv.style.height = mvideoR.height+"px";
 		stDiv.style.width = mvideoR.width+"px";
-
+		self._stDiv = stDiv;
 		var svideoR = paella.player.videoContainer.getSlaveVideoRect();
 		ndDiv.style.top = svideoR.top+"px";
 		ndDiv.style.left = svideoR.left+"px";
 		ndDiv.style.height = svideoR.height+"px";
 		ndDiv.style.width = svideoR.width+"px";
+		self._ndDiv = ndDiv;
 
-
-		$("#overlayContainer").append(stDiv);
-		$("#overlayContainer").append(ndDiv);
+		$(self._overlayContainer).append(blackBoardDiv);
+		$(self._overlayContainer).append(stDiv);
+		$(self._overlayContainer).append(ndDiv);
 
 		
-		$(self._overlayContainer).append(blackBoardDiv);
+		$(ndDiv).click(function(e){
+			paella.events.trigger(paella.events.setProfile,{profileName:'slide'});
+		});
+		$(stDiv).click(function(e){
+			paella.events.trigger(paella.events.setProfile,{profileName:'professor'});
+		});
+
+		if(self._divWidth==null && self._divHeight==null){
+			self._divWidth = $(self._blackBoardDIV).width();
+			self._divHeight = $(self._blackBoardDIV).height();
+		}
 
 		// ZOOM
 		$(self._blackBoardDIV).bind('wheel mousewheel', function(e){
@@ -138,10 +159,23 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
                 self._currentZoom -= 10; 
             }
             self._blackBoardDIV.style.backgroundSize = (self._currentZoom)+"%";
+            self._blackBoardDIV.style.backgroundPosition = self.posX.toString()+'% '+self.posY.toString()+'%';
         });
 		
+		$(self._blackBoardDIV).mousemove(function(event) {
+			self.posX = event.pageX*100/self._divWidth;
+			self.posY = event.pageY*100/self._divHeight;
+			console.log(self.posX +"  "+self.posY);
+		});
 
 
+		// TEST
+		if(self._actualImage){
+			$(self._blackBoardDIV).css('background-image', 'url(' + self._actualImage + ')');
+		}
+
+		$('#playerContainer_videoContainer_1').css('zIndex',10);
+		$('#playerContainer_videoContainer_2').css('zIndex',10);
 	},
 
 	destroyOverlay:function(){
@@ -150,15 +184,23 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		if(self._blackBoardDIV){
 			$(self._blackBoardDIV).remove();
 		}
+		if(self._stDiv){
+			$(self._stDiv).remove();
+		}
+		if(self._ndDiv){
+			$(self._ndDiv).remove();
+		}
+
 	},
 
 	imageUpdate:function(event,params) {
 
 			var self = this;
 			var sec = Math.round(params.currentTime);
-			var src = $(self._blackBoardDIV).css('background-image');
+			
 
 			if($(self._blackBoardDIV).length>0){
+				var src = $(self._blackBoardDIV).css('background-image');
 
 				if(self._zImages.hasOwnProperty("frame_"+sec)) { // SWAP IMAGES WHEN PLAYING
 					if(src == self._zImages["frame_"+sec]) return;
