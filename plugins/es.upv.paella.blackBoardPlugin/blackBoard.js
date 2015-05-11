@@ -16,6 +16,8 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 	_lensWidth:90,
 	_lensHeight:50,
 	_conImg:null,
+	_currentZoom:100,
+	_maxZoom:250,
 
 	getIndex:function(){return 10;},
 
@@ -84,41 +86,6 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		}
 	},
 
-	createLens:function(top,left,width,height){
-		var self = this;
-		
-			var lens = document.createElement("div");
-			lens.className = "lensClass";
-			self._lensDIV = lens;
-
-			$(self._lensContainer).append(lens);
-			$(self._lensContainer).mousemove(function(event) {
-			if(event.pageX > (left+(self._lensWidth/2)) &&  
-				event.pageX < (left+width)-(self._lensWidth/2) &&
-				event.pageY > (top+100) &&
-				event.pageY < (top+100+height)-(self._lensWidth/2) ){
-        		self._lensDIV.style.left=event.pageX-(self._lensWidth/2)+"px";
-        		self._lensDIV.style.top=event.pageY-(self._lensHeight/2)+"px";
-
-        		var x = (event.pageX-left) * 100 / (width);
-        		var y = (event.pageY-top-100) * 100 / (height);
-        		//console.log(x +" %  "+ y +" %");
-        		self._blackBoardDIV.style.backgroundSize = 250+'%';
-        		self._blackBoardDIV.style.backgroundPosition = x.toString() + '% ' + y.toString() + '%';
-
-        		}
-    		});
-		
-	},
-	destroyLens:function(){
-		var self=this;
-		if(self._lensDIV){
-			$(self._lensDIV).remove();
-			self._blackBoardDIV.style.backgroundSize = 100+'%';
-			self._blackBoardDIV.style.opacity = 0;
-		}
-	},
-
 	createOverlay:function(){
 		var self = this;
 
@@ -154,6 +121,24 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 
 		
 		$(self._overlayContainer).append(blackBoardDiv);
+
+		// ZOOM
+		$(self._blackBoardDIV).bind('wheel mousewheel', function(e){
+        var delta;
+
+        if (e.originalEvent.wheelDelta !== undefined)
+            delta = e.originalEvent.wheelDelta;
+        else
+            delta = e.originalEvent.deltaY * -1;
+
+            if(delta > 0 && self._currentZoom<self._maxZoom) {
+            	self._currentZoom += 10; 
+            }
+            else if(self._currentZoom>100){
+                self._currentZoom -= 10; 
+            }
+            self._blackBoardDIV.style.backgroundSize = (self._currentZoom)+"%";
+        });
 		
 
 
