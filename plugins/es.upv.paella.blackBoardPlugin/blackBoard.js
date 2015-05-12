@@ -24,6 +24,7 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 	_posY:null,
 	_stDiv:null,
 	_ndDiv:null,
+	_zImg:null,
 
 
 	getIndex:function(){return 10;},
@@ -112,6 +113,9 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		var ndDiv = document.createElement("div");
 		ndDiv.className = "ndDiv";
 
+		var zoomImg = document.createElement("div");
+		zoomImg.className = "zoomImg";
+		self._zImg = zoomImg;
 		
 		var mvideoR = paella.player.videoContainer.getMasterVideoRect();
 		stDiv.style.top = mvideoR.top+"px";
@@ -130,12 +134,16 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		$(self._overlayContainer).append(stDiv);
 		$(self._overlayContainer).append(ndDiv);
 
+		$('#playerContainer_videoContainer_container').append(zoomImg);
+
 		
 		$(ndDiv).click(function(e){
 			paella.events.trigger(paella.events.setProfile,{profileName:'slide'});
+			e.stopPropagation();
 		});
 		$(stDiv).click(function(e){
 			paella.events.trigger(paella.events.setProfile,{profileName:'professor'});
+			e.stopPropagation();
 		});
 
 		if(self._divWidth==null && self._divHeight==null){
@@ -158,24 +166,21 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
             else if(self._currentZoom>100){
                 self._currentZoom -= 10; 
             }
-            self._blackBoardDIV.style.backgroundSize = (self._currentZoom)+"%";
-            self._blackBoardDIV.style.backgroundPosition = self.posX.toString()+'% '+self.posY.toString()+'%';
+            self._zImg.style.backgroundSize = (self._currentZoom)+"%";
+            self._zImg.style.backgroundPosition = self.posX.toString()+'% '+self.posY.toString()+'%';
         });
 		var p = $('.blackBoardDiv').offset();
 		$(self._blackBoardDIV).mousemove(function(event) {
 			self.posX = event.pageX*100/self._divWidth;
-			self.posY = event.pageY*100/(self._divHeight+p.top);
+			self.posY = (event.pageY-p.top)*100/(self._divHeight);
 			console.log(self.posX +"  "+self.posY);
 		});
 
 
 		// TEST
 		if(self._actualImage){
-			$(self._blackBoardDIV).css('background-image', 'url(' + self._actualImage + ')');
+			$(self._zImg).css('background-image', 'url(' + self._actualImage + ')');
 		}
-
-		$('#playerContainer_videoContainer_1').css('zIndex',10);
-		$('#playerContainer_videoContainer_2').css('zIndex',10);
 	},
 
 	destroyOverlay:function(){
@@ -190,6 +195,10 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 		if(self._ndDiv){
 			$(self._ndDiv).remove();
 		}
+		if(self._zImg){
+			$(self._zImg).remove();
+		}
+
 
 	},
 
@@ -199,8 +208,8 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 			var sec = Math.round(params.currentTime);
 			
 
-			if($(self._blackBoardDIV).length>0){
-				var src = $(self._blackBoardDIV).css('background-image');
+			if($(self._zImg).length>0){
+				var src = $(self._zImg).css('background-image');
 
 				if(self._zImages.hasOwnProperty("frame_"+sec)) { // SWAP IMAGES WHEN PLAYING
 					if(src == self._zImages["frame_"+sec]) return;
@@ -215,7 +224,7 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
 					//PRELOAD NEXT IMAGE
 					var image = new Image();
 					image.onload = function(){
-	    			$(self._blackBoardDIV).css('background-image', 'url(' + src + ')'); // UPDATING IMAGE
+	    			$(self._zImg).css('background-image', 'url(' + src + ')'); // UPDATING IMAGE
 					};
 					image.src = src;
 
