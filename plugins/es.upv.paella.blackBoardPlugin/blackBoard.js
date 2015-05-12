@@ -161,10 +161,10 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
             self._blackBoardDIV.style.backgroundSize = (self._currentZoom)+"%";
             self._blackBoardDIV.style.backgroundPosition = self.posX.toString()+'% '+self.posY.toString()+'%';
         });
-		
+		var p = $('.blackBoardDiv').offset();
 		$(self._blackBoardDIV).mousemove(function(event) {
 			self.posX = event.pageX*100/self._divWidth;
-			self.posY = event.pageY*100/self._divHeight;
+			self.posY = event.pageY*100/(self._divHeight+p.top);
 			console.log(self.posX +"  "+self.posY);
 		});
 
