@@ -47,12 +47,11 @@ Class ("paella.BlackBoard", paella.EventDrivenPlugin,{
     	var self = this;
     	switch(event){
     		case paella.events.setProfile: if(params.profileName==self._blackBoardProfile){
-   												if(self._blackBoardDIV!=null) {	
+   													self.destroyOverlay();	
 	    											setTimeout(function(e){
 													self.createOverlay();
 	    											},self._creationTimer);
 	    											self._active = true;
-	    										}
     										} 
     										else{
     											self.destroyOverlay();
